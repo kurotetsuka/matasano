@@ -5,25 +5,23 @@ clean:
 	rm -rf bin/*
 
 #vars
-
+options = -A dead_code -A unused_variable
 
 #includes
 include lists.mk
 
 #compilation definitions
-$(bin_dirs):
-	mkdir -p $@
-$(binaries): bin/% : src/%.rs $(bin_dirs)
-	rustc -g $< -o $@
+$(binaries): bin/% : src/%.rs
+	rustc $(options) -g $< -o $@
 
 #commands
 build: $(binaries)
 
 #tests
-test: test-set1-one
+test: test-set-one
 
 test-pg: bin/test
 	bin/test
 
-test-set1-one: bin/set_one/one
-	bin/set_one/one
+test-set-one: bin/set_one
+	bin/set_one
