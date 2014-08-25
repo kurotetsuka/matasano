@@ -20,7 +20,7 @@ build: $(binaries)
 #tests
 test: test-set-one
 
-test-pg: bin/test
+test-lang: bin/test
 	bin/test
 
 test-set-one: bin/set_one

@@ -48,7 +48,18 @@ fn challenge_two(){
 	println!("\tresult == desired: {}", result.as_slice() == desired);}
 /// solution implementation for challenge three
 fn challenge_three(){
-	println!("challenge three ::");}
+	println!("challenge three ::");
+	//params
+	let input =
+		"1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
+	//convert input to bytes
+	let input_bytes = hexstr_tobytes( input);
+	//try every possible cipher
+	for cipher in range( 0u8, 255) {
+		let attempt_bytes = byte_cipher( input_bytes.as_slice(), cipher);
+		let attempt_hexstr = bytes_tohexstr( attempt_bytes.as_slice());
+		println!( "attempt {}: {}", cipher, attempt_hexstr);}}
+
 /// solution implementation for challenge four
 fn challenge_four(){
 	println!("challenge four ::");}
@@ -148,14 +159,14 @@ fn b64code_tochar( code : u8) -> char {
 		52..61 => ( code - 52 + ('0' as u8)) as char,
 		62 => '+',
 		63 => '/',
-		_ => fail!("error: byte out of range")}}
+		_ => fail!("error: code out of range")}}
 
 /// convert a hec
 fn hexcode_tochar( code : u8) -> char {
 	match code {
 		00..09 => ( code - 00 + ('0' as u8)) as char,
 		10..15 => ( code - 10 + ('a' as u8)) as char,
-		_ => fail!("error: byte out of range")}}
+		_ => fail!("error: code out of range")}}
 
 
 //other operations
@@ -165,4 +176,11 @@ fn xor_bytes( a : &[u8], b : &[u8]) -> Vec<u8> {
 	let mut result = Vec::new();
 	for i in range( 0, size) {
 		result.push( a[i] ^ b[i]);}
+	return result;}
+
+/// single byte xor cipher
+fn byte_cipher( original : &[u8], cipher : u8) -> Vec<u8> {
+	let mut result = Vec::new();
+	for &byte in original.iter() {
+		result.push( byte ^ cipher);}
 	return result;}
