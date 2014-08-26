@@ -1,5 +1,5 @@
 //imports
-
+use std::collections::TreeMap;
 
 ///rust all this set's challenges
 fn main(){
@@ -54,11 +54,25 @@ fn challenge_three(){
 		"1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
 	//convert input to bytes
 	let input_bytes = hexstr_tobytes( input);
-	//try every possible cipher
-	for cipher in range( 0u8, 255) {
-		let attempt_bytes = byte_cipher( input_bytes.as_slice(), cipher);
-		let attempt_hexstr = bytes_tohexstr( attempt_bytes.as_slice());
-		println!( "attempt {}: {}", cipher, attempt_hexstr);}}
+	//create score table
+	/*let input_score = score_bytes( input_bytes.as_slice());
+	println!("score table: {}", input_score);*/
+	//result of above:
+	//  most common bytes in input_bytes: { 120: 6, 55: 5, 54: 3 }
+	//let common_bytes = [ 120, 55, 54 ];
+	let common_bytes = [ 55 ];
+	//let common_chars = [' ','e','t','a','o','i','n','s','h','r','d','l','u'];
+	//let common_chars = [ ' ', 'e', 't', 'a', 'o', 'i'];
+	let common_chars = [ 'o'];
+	for &common_byte in common_bytes.iter() {
+		for &common_char in common_chars.iter() {
+			let common_char_byte = common_char.to_ascii().to_byte();
+			let cipher_byte = common_char_byte ^ common_byte;
+			let attempt_bytes = byte_cipher( input_bytes.as_slice(), cipher_byte);
+			let attempt_ascii = attempt_bytes.as_slice().to_ascii();
+			let attempt = attempt_ascii.as_str_ascii();
+			println!("{}, {} :: {}", common_byte, common_char, attempt);}}}
+
 
 /// solution implementation for challenge four
 fn challenge_four(){
@@ -177,6 +191,16 @@ fn xor_bytes( a : &[u8], b : &[u8]) -> Vec<u8> {
 	for i in range( 0, size) {
 		result.push( a[i] ^ b[i]);}
 	return result;}
+
+fn score_bytes( bytes : &[u8]) -> TreeMap<u8, u8> {
+	let mut table : TreeMap<u8, u8> = TreeMap::new();
+	for &byte in bytes.iter() {
+		let new_count =
+			match table.find( &byte) {
+				Some( count) => count + 1,
+				None => 1};
+		table.insert( byte, new_count);}
+	return table;}
 
 /// single byte xor cipher
 fn byte_cipher( original : &[u8], cipher : u8) -> Vec<u8> {
