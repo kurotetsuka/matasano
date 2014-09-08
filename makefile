@@ -20,8 +20,8 @@ build: $(binaries)
 #tests
 test: test-set-one
 
-test-lang: bin/test
-	bin/test
+test-asdf: bin/asdf
+	bin/asdf
 
 test-set-one: bin/set_one
 	bin/set_one

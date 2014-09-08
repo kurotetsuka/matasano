@@ -1,5 +1,8 @@
 //imports
+use std::collections::HashMap;
 use std::collections::TreeMap;
+use std::io::BufferedReader;
+use std::io::File;
 
 ///rust all this set's challenges
 fn main(){
@@ -7,7 +10,7 @@ fn main(){
 	//challenge_one();
 	//challenge_two();
 	challenge_three();
-	//challenge_four();
+	challenge_four();
 	//challenge_five();
 	//challenge_six();
 	//challenge_seven();
@@ -15,9 +18,9 @@ fn main(){
 }
 
 //challenges
-/// solution implementation for challenge one
+/// solution for challenge one
 fn challenge_one(){
-	println!("challenge one ::");
+	//println!("challenge one ::");
 	//params
 	let input = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
 	let desired = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
@@ -28,7 +31,7 @@ fn challenge_one(){
 	println!("\tresult: {}", result);
 	println!("\tresult == desired: {}", result.as_slice() == desired);}
 
-/// solution implementation for challenge two
+/// solution for challenge two
 fn challenge_two(){
 	println!("challenge two ::");
 	//params
@@ -46,47 +49,37 @@ fn challenge_two(){
 	//print info
 	println!("\tresult: {}", result);
 	println!("\tresult == desired: {}", result.as_slice() == desired);}
-/// solution implementation for challenge three
+
+/// solution for challenge three
 fn challenge_three(){
 	println!("challenge three ::");
 	//params
 	let input =
 		"1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
-	//convert input to bytes
-	let input_bytes = hexstr_tobytes( input);
-	//create score table
-	/*let input_score = score_bytes( input_bytes.as_slice());
-	println!("score table: {}", input_score);*/
-	//result of above:
-	//  most common bytes in input_bytes: { 120: 6, 55: 5, 54: 3 }
-	//let common_bytes = [ 120, 55, 54 ];
-	let common_bytes = [ 55 ];
-	//let common_chars = [' ','e','t','a','o','i','n','s','h','r','d','l','u'];
-	//let common_chars = [ ' ', 'e', 't', 'a', 'o', 'i'];
-	let common_chars = [ 'o'];
-	for &common_byte in common_bytes.iter() {
-		for &common_char in common_chars.iter() {
-			let common_char_byte = common_char.to_ascii().to_byte();
-			let cipher_byte = common_char_byte ^ common_byte;
-			let attempt_bytes = byte_cipher( input_bytes.as_slice(), cipher_byte);
-			let attempt_ascii = attempt_bytes.as_slice().to_ascii();
-			let attempt = attempt_ascii.as_str_ascii();
-			println!("{}, {} :: {}", common_byte, common_char, attempt);}}}
+	let extractions = crack_xor_cipher( input);
+	print!("extractions:");
+	print!("cipher :: message :: rating");
+	for ( &cipher, ( message, rating)) in extractions.iter() {
+		print!("{:02x} :: {} :: {:.2f}", cipher, message, rating);}}
 
-
-/// solution implementation for challenge four
+/// solution for challenge four
 fn challenge_four(){
+	let lines = read_lines( "data/4.txt");
 	println!("challenge four ::");}
-/// solution implementation for challenge five
+
+/// solution for challenge five
 fn challenge_five(){
 	println!("challenge five ::");}
-/// solution implementation for challenge six
+
+/// solution for challenge six
 fn challenge_six(){
 	println!("challenge six ::");}
-/// solution implementation for challenge seven
+
+/// solution for challenge seven
 fn challenge_seven(){
 	println!("challenge seven ::");}
-/// solution implementation for challenge eight
+
+/// solution for challenge eight
 fn challenge_eight(){
 	println!("challenge eight ::");}
 
@@ -182,8 +175,7 @@ fn hexcode_tochar( code : u8) -> char {
 		10..15 => ( code - 10 + ('a' as u8)) as char,
 		_ => fail!("error: code out of range")}}
 
-
-//other operations
+//utilities
 /// xor two byte arrays
 fn xor_bytes( a : &[u8], b : &[u8]) -> Vec<u8> {
 	let size = std::cmp::min( a.len(), b.len());
@@ -207,4 +199,84 @@ fn byte_cipher( original : &[u8], cipher : u8) -> Vec<u8> {
 	let mut result = Vec::new();
 	for &byte in original.iter() {
 		result.push( byte ^ cipher);}
+	return result;}
+
+fn crack_xor_cipher( input : &str) -> HashMap< u8, ( String, f32)> {
+	//convert input to bytes
+	let input_bytes = hexstr_tobytes( input);
+	//create score table
+	let input_scores = score_bytes( input_bytes.as_slice());
+	println!("score table: {}", input_scores);
+	//find top scores
+	let mut top_scores : Vec<u8> = Vec::new();
+	let scores_cap = 3;
+	for &value in input_scores.values() {
+		top_scores.push( value);}
+	top_scores.sort();
+	top_scores.reverse();
+	let top_scores = top_scores.slice_to( scores_cap);
+	println!("top {} scores: {}", scores_cap, top_scores);
+	//find bytes that match top scores
+	let mut common_bytes : Vec<u8> = Vec::new();
+	for ( &byte, score) in input_scores.iter() {
+		if top_scores.contains( score) {
+			common_bytes.push( byte);}}
+	//result of above:
+	//  most common bytes in input_bytes: { 120: 6, 55: 5, 54: 3 }
+	let common_bytes = common_bytes.as_slice();
+	println!("common bytes: {}", common_bytes);
+	//let common_chars = [' ','e','t','a','o','i','n','s','h','r','d','l','u'];
+	let common_chars = [' ', 'e', 't', 'a', 'o', 'i'];
+	let mut extractions : HashMap< u8, ( String, f32)> = HashMap::new();
+	let rating_cap : f32 = 0.8;
+	for &common_byte in common_bytes.iter() {
+		for &common_char in common_chars.iter() {
+			let common_char_byte = common_char.to_ascii().to_byte();
+			let cipher_byte = common_char_byte ^ common_byte;
+			if extractions.contains_key( &cipher_byte) {
+				continue;}
+			//create attempt
+			let attempt_bytes = byte_cipher( input_bytes.as_slice(), cipher_byte);
+			let attempt_ascii = attempt_bytes.as_slice().to_ascii();
+			let attempt = attempt_ascii.as_str_ascii();
+			//try to filter attempt
+			let rating  = rate_attempt( attempt);
+			if rating > rating_cap {
+				extractions.insert(
+					cipher_byte, ( String::from_str( attempt), rating));
+				println!("{:02x}, '{}' :: {} :: {}",
+					common_byte, common_char, attempt, rating);}}}
+	return extractions;}
+
+/// rate the likelihood a string is a good decoding attempt
+fn rate_attempt( attempt : &str) -> f32 {
+	let good_chars = "abcdefghijklmnopqrstuvwxyz ,.?!\'\"";
+	let neut_chars = "()[]{}<>-=_+:;/@#$%^&*~`";
+	let mut positive : f32 = 0.0;
+	let mut negative : f32 = 0.0;
+	let count = attempt.len();
+	//count good and (probably) bad chars
+	for attempt_char in attempt.chars() {
+		let char_lower = attempt_char.to_lowercase();
+		if good_chars.contains_char( char_lower) {
+			positive += 1.0;}
+		else if ! neut_chars.contains_char( char_lower) {
+			negative += 1.0;}}
+	let numerator = positive.powi( 2) - negative.powi( 2);
+	let denominator = count.to_f32().unwrap().powi( 2);
+	return numerator / denominator;}
+
+fn read_lines( filename : &str) -> Vec<String> {
+	// Create a path to the desired file
+	let path = Path::new( filename);
+	let file = File::open( &path);
+	let mut reader = BufferedReader::new( file);
+
+	let mut result : Vec<String> = Vec::new();
+	for line_result in reader.lines() {
+		if ! line_result.is_ok() {
+			fail!( "reading a line failed");}
+		let line = line_result.unwrap();
+		let line_stripped = line.as_slice().trim_chars('\n');
+		result.push( String::from_str( line_stripped));}
 	return result;}

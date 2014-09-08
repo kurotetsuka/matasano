@@ -1,7 +1,7 @@
 binaries = \
 	bin/set_one \
-	bin/test
+	bin/asdf
 
 source_files = \
 	src/set_one.rs \
-	src/test.rs
+	src/asdf.rs
