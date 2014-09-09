@@ -6,10 +6,10 @@ use std::io::File;
 ///rust all this set's challenges
 fn main(){
 	println!("set one ::");
-	challenge_one();
-	challenge_two();
-	challenge_three();
-	challenge_four();
+	//challenge_one();
+	//challenge_two();
+	//challenge_three();
+	//challenge_four();
 	challenge_five();
 	//challenge_six();
 	//challenge_seven();
@@ -81,6 +81,31 @@ fn challenge_four(){
 /// solution for challenge five
 fn challenge_five(){
 	println!("challenge five ::");
+	//params
+	let input0 = "Burning 'em, if you ain't quick and nimble";
+	let input1 = "I go crazy when I hear a cymbal";
+	let desired0 =
+		"0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272";
+	let desired1 =
+		"a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
+	let key = "ICE";
+	//convert to bytes
+	let input0_bytes = ascii_tobytes( input0);
+	let input1_bytes = ascii_tobytes( input1);
+	let key_bytes = ascii_tobytes( key);
+	//apply repeating-key xor cipher
+	let result0_bytes = rkxor_cipher(
+		input0_bytes.as_slice(), key_bytes.as_slice());
+	let result1_bytes = rkxor_cipher(
+		input1_bytes.as_slice(), key_bytes.as_slice());
+	//convert to string
+	let result0 = bytes_tohexstr( result0_bytes.as_slice());
+	let result1 = bytes_tohexstr( result1_bytes.as_slice());
+	//print info
+	println!("result0: {}", result0);
+	println!("result0 == desired0: {}", result0.as_slice() == desired0);
+	println!("result1: {}", result1);
+	println!("result1 == desired1: {}", result1.as_slice() == desired1);
 	println!("done challenge five");}
 
 /// solution for challenge six
@@ -190,6 +215,12 @@ fn hexcode_tochar( code : u8) -> char {
 		10..15 => ( code - 10 + ('a' as u8)) as char,
 		_ => fail!("error: code out of range")}}
 
+fn ascii_tobytes( string : &str) -> Vec<u8> {
+	let mut result = Vec::new();
+	for character in string.chars() {
+		result.push( character.to_ascii().to_byte());}
+	return result;}
+
 //utilities
 /// xor two byte arrays
 fn xor_bytes( a : &[u8], b : &[u8]) -> Vec<u8> {
@@ -199,6 +230,7 @@ fn xor_bytes( a : &[u8], b : &[u8]) -> Vec<u8> {
 		result.push( a[i] ^ b[i]);}
 	return result;}
 
+/// return a map of the bytes to their occurance counts
 fn score_bytes( bytes : &[u8]) -> TreeMap<u8, u8> {
 	let mut table : TreeMap<u8, u8> = TreeMap::new();
 	for &byte in bytes.iter() {
@@ -210,12 +242,21 @@ fn score_bytes( bytes : &[u8]) -> TreeMap<u8, u8> {
 	return table;}
 
 /// single byte xor cipher
-fn byte_cipher( original : &[u8], cipher : u8) -> Vec<u8> {
+fn xor_cipher( original : &[u8], cipher : u8) -> Vec<u8> {
 	let mut result = Vec::new();
 	for &byte in original.iter() {
 		result.push( byte ^ cipher);}
 	return result;}
 
+/// asdf
+fn rkxor_cipher( original : &[u8], cipher : &[u8]) -> Vec<u8> {
+	let mut result = Vec::new();
+	let ks = cipher.len();
+	for i in range( 0, original.len()) {
+		result.push( original[i] ^ cipher[ i % ks ]);}
+	return result;}
+
+/// try to break single byte xor cipher
 fn crack_xor_cipher( input : &str) -> TreeMap< u8, (String, f32)> {
 	//convert input to bytes
 	let input_bytes = hexstr_tobytes( input);
@@ -251,7 +292,7 @@ fn crack_xor_cipher( input : &str) -> TreeMap< u8, (String, f32)> {
 			if extractions.contains_key( &cipher_byte) {
 				continue;}
 			//create attempt
-			let attempt_bytes = byte_cipher( input_bytes.as_slice(), cipher_byte);
+			let attempt_bytes = xor_cipher( input_bytes.as_slice(), cipher_byte);
 			let attempt_slice = attempt_bytes.as_slice();
 			if ! attempt_slice.is_ascii() {
 				continue;}
