@@ -1,5 +1,4 @@
 //imports
-use std::collections::HashMap;
 use std::collections::TreeMap;
 use std::io::BufferedReader;
 use std::io::File;
@@ -9,7 +8,7 @@ fn main(){
 	println!("set one ::");
 	//challenge_one();
 	//challenge_two();
-	challenge_three();
+	//challenge_three();
 	challenge_four();
 	//challenge_five();
 	//challenge_six();
@@ -57,15 +56,23 @@ fn challenge_three(){
 	let input =
 		"1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
 	let extractions = crack_xor_cipher( input);
-	print!("extractions:");
-	print!("cipher :: message :: rating");
-	for ( &cipher, ( message, rating)) in extractions.iter() {
-		print!("{:02x} :: {} :: {:.2f}", cipher, message, rating);}}
+	println!("extractions:");
+	println!("cipher :: message :: rating");
+	for ( &cipher, &( ref message, ref rating)) in extractions.iter() {
+		println!("{:02x} :: {} :: {:.2f}", cipher, message, *rating);}}
 
 /// solution for challenge four
 fn challenge_four(){
+	println!("challenge four ::");
 	let lines = read_lines( "data/4.txt");
-	println!("challenge four ::");}
+	let mut i : int = 0;
+	for ref line in lines.iter() {
+		let extractions = crack_xor_cipher( line.as_slice());
+		if ! extractions.is_empty() {
+			println!("extractions for line {}:", i);
+			for ( &cipher, &( ref message, ref rating)) in extractions.iter() {
+				println!("{:02x} :: {} :: {:.2f}\n", cipher, message, *rating);}}
+		i += 1;}}
 
 /// solution for challenge five
 fn challenge_five(){
@@ -201,12 +208,12 @@ fn byte_cipher( original : &[u8], cipher : u8) -> Vec<u8> {
 		result.push( byte ^ cipher);}
 	return result;}
 
-fn crack_xor_cipher( input : &str) -> HashMap< u8, ( String, f32)> {
+fn crack_xor_cipher( input : &str) -> TreeMap< u8, (String, f32)> {
 	//convert input to bytes
 	let input_bytes = hexstr_tobytes( input);
 	//create score table
 	let input_scores = score_bytes( input_bytes.as_slice());
-	println!("score table: {}", input_scores);
+	//println!("score table: {}", input_scores);
 	//find top scores
 	let mut top_scores : Vec<u8> = Vec::new();
 	let scores_cap = 3;
@@ -215,7 +222,7 @@ fn crack_xor_cipher( input : &str) -> HashMap< u8, ( String, f32)> {
 	top_scores.sort();
 	top_scores.reverse();
 	let top_scores = top_scores.slice_to( scores_cap);
-	println!("top {} scores: {}", scores_cap, top_scores);
+	//println!("top {} scores: {}", scores_cap, top_scores);
 	//find bytes that match top scores
 	let mut common_bytes : Vec<u8> = Vec::new();
 	for ( &byte, score) in input_scores.iter() {
@@ -224,10 +231,10 @@ fn crack_xor_cipher( input : &str) -> HashMap< u8, ( String, f32)> {
 	//result of above:
 	//  most common bytes in input_bytes: { 120: 6, 55: 5, 54: 3 }
 	let common_bytes = common_bytes.as_slice();
-	println!("common bytes: {}", common_bytes);
+	//println!("common bytes: {}", common_bytes);
 	//let common_chars = [' ','e','t','a','o','i','n','s','h','r','d','l','u'];
 	let common_chars = [' ', 'e', 't', 'a', 'o', 'i'];
-	let mut extractions : HashMap< u8, ( String, f32)> = HashMap::new();
+	let mut extractions : TreeMap< u8, (String, f32)> = TreeMap::new();
 	let rating_cap : f32 = 0.8;
 	for &common_byte in common_bytes.iter() {
 		for &common_char in common_chars.iter() {
@@ -237,15 +244,18 @@ fn crack_xor_cipher( input : &str) -> HashMap< u8, ( String, f32)> {
 				continue;}
 			//create attempt
 			let attempt_bytes = byte_cipher( input_bytes.as_slice(), cipher_byte);
-			let attempt_ascii = attempt_bytes.as_slice().to_ascii();
+			let attempt_slice = attempt_bytes.as_slice();
+			if ! attempt_slice.is_ascii() {
+				continue;}
+			let attempt_ascii = attempt_slice.to_ascii();
 			let attempt = attempt_ascii.as_str_ascii();
+			for &trimchar in ['\n',' ','\t'].iter() {
+				attempt.trim_chars( trimchar);}
 			//try to filter attempt
 			let rating  = rate_attempt( attempt);
 			if rating > rating_cap {
 				extractions.insert(
-					cipher_byte, ( String::from_str( attempt), rating));
-				println!("{:02x}, '{}' :: {} :: {}",
-					common_byte, common_char, attempt, rating);}}}
+					cipher_byte, ( String::from_str( attempt), rating));}}}
 	return extractions;}
 
 /// rate the likelihood a string is a good decoding attempt
