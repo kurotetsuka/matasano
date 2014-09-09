@@ -6,20 +6,20 @@ use std::io::File;
 ///rust all this set's challenges
 fn main(){
 	println!("set one ::");
-	//challenge_one();
-	//challenge_two();
-	//challenge_three();
-	//challenge_four();
+	challenge_one();
+	challenge_two();
+	challenge_three();
+	challenge_four();
 	challenge_five();
 	//challenge_six();
 	//challenge_seven();
 	//challenge_eight();
-}
+	println!("done set one");}
 
 //challenges
 /// solution for challenge one
 fn challenge_one(){
-	//println!("challenge one ::");
+	println!("challenge one ::");
 	//params
 	let input = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
 	let desired = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
@@ -27,8 +27,9 @@ fn challenge_one(){
 	let result = hexstr_tob64str( input);
 	//print info
 	//println!("input: {}", input);
-	println!("\tresult: {}", result);
-	println!("\tresult == desired: {}", result.as_slice() == desired);}
+	println!("result: {}", result);
+	println!("result == desired: {}", result.as_slice() == desired);
+	println!("done challenge one");}
 
 /// solution for challenge two
 fn challenge_two(){
@@ -46,8 +47,9 @@ fn challenge_two(){
 	//convert to string
 	let result = bytes_tohexstr( result_bytes.as_slice());
 	//print info
-	println!("\tresult: {}", result);
-	println!("\tresult == desired: {}", result.as_slice() == desired);}
+	println!("result: {}", result);
+	println!("result == desired: {}", result.as_slice() == desired);
+	println!("done challenge two");}
 
 /// solution for challenge three
 fn challenge_three(){
@@ -59,7 +61,8 @@ fn challenge_three(){
 	println!("extractions:");
 	println!("cipher :: message :: rating");
 	for ( &cipher, &( ref message, ref rating)) in extractions.iter() {
-		println!("{:02x} :: {} :: {:.2f}", cipher, message, *rating);}}
+		println!("{:02x} :: {} :: {:.2f}", cipher, message, *rating);}
+	println!("done challenge three");}
 
 /// solution for challenge four
 fn challenge_four(){
@@ -71,24 +74,29 @@ fn challenge_four(){
 		if ! extractions.is_empty() {
 			println!("extractions for line {}:", i);
 			for ( &cipher, &( ref message, ref rating)) in extractions.iter() {
-				println!("{:02x} :: {} :: {:.2f}\n", cipher, message, *rating);}}
-		i += 1;}}
+				println!("{:02x} :: {} :: {:.2f}", cipher, message, *rating);}}
+		i += 1;}
+	println!("done challenge four");}
 
 /// solution for challenge five
 fn challenge_five(){
-	println!("challenge five ::");}
+	println!("challenge five ::");
+	println!("done challenge five");}
 
 /// solution for challenge six
 fn challenge_six(){
-	println!("challenge six ::");}
+	println!("challenge six ::");
+	println!("done challenge six");}
 
 /// solution for challenge seven
 fn challenge_seven(){
-	println!("challenge seven ::");}
+	println!("challenge seven ::");
+	println!("done challenge seven");}
 
 /// solution for challenge eight
 fn challenge_eight(){
-	println!("challenge eight ::");}
+	println!("challenge eight ::");
+	println!("done challenge eight");}
 
 
 //conversion functions
