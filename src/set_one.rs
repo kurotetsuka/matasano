@@ -9,8 +9,8 @@ fn main(){
 	//challenge_one();
 	//challenge_two();
 	//challenge_three();
-	challenge_four();
-	//challenge_five();
+	//challenge_four();
+	challenge_five();
 	//challenge_six();
 	//challenge_seven();
 	//challenge_eight();
