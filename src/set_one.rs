@@ -3,7 +3,7 @@ use std::collections::TreeMap;
 use std::io::BufferedReader;
 use std::io::File;
 
-///rust all this set's challenges
+/// all this set's challenges
 fn main(){
 	println!("set one ::");
 	//challenge_one();
@@ -82,30 +82,26 @@ fn challenge_four(){
 fn challenge_five(){
 	println!("challenge five ::");
 	//params
-	let input0 = "Burning 'em, if you ain't quick and nimble";
-	let input1 = "I go crazy when I hear a cymbal";
-	let desired0 =
-		"0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272";
-	let desired1 =
-		"a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
+	let input =
+		"Burning 'em, if you ain't quick and nimble\n".to_string() +
+		"I go crazy when I hear a cymbal";
+	let desired =
+		"0b3637272a2b2e63622c2e69692a23693a2a3c".to_string() +
+		"6324202d623d63343c2a26226324272765272a" +
+		"282b2f20430a652e2c652a3124333a653e2b20" +
+		"27630c692b20283165286326302e27282f";
 	let key = "ICE";
 	//convert to bytes
-	let input0_bytes = ascii_tobytes( input0);
-	let input1_bytes = ascii_tobytes( input1);
+	let input_bytes = ascii_tobytes( input.as_slice());
 	let key_bytes = ascii_tobytes( key);
 	//apply repeating-key xor cipher
-	let result0_bytes = rkxor_cipher(
-		input0_bytes.as_slice(), key_bytes.as_slice());
-	let result1_bytes = rkxor_cipher(
-		input1_bytes.as_slice(), key_bytes.as_slice());
+	let result_bytes = rkxor_cipher(
+		input_bytes.as_slice(), key_bytes.as_slice());
 	//convert to string
-	let result0 = bytes_tohexstr( result0_bytes.as_slice());
-	let result1 = bytes_tohexstr( result1_bytes.as_slice());
+	let result = bytes_tohexstr( result_bytes.as_slice());
 	//print info
-	println!("result0: {}", result0);
-	println!("result0 == desired0: {}", result0.as_slice() == desired0);
-	println!("result1: {}", result1);
-	println!("result1 == desired1: {}", result1.as_slice() == desired1);
+	println!("result: {}", result);
+	println!("result == desired: {}", result == desired);
 	println!("done challenge five");}
 
 /// solution for challenge six
@@ -325,6 +321,7 @@ fn rate_attempt( attempt : &str) -> f32 {
 	let denominator = count.to_f32().unwrap().powi( 2);
 	return numerator / denominator;}
 
+/// read every line in file, and write result
 fn read_lines( filename : &str) -> Vec<String> {
 	// Create a path to the desired file
 	let path = Path::new( filename);
