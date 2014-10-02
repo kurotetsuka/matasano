@@ -10,8 +10,8 @@ fn main(){
 	//challenge_two();
 	//challenge_three();
 	//challenge_four();
-	challenge_five();
-	//challenge_six();
+	//challenge_five();
+	challenge_six();
 	//challenge_seven();
 	//challenge_eight();
 	println!("done set one");}
@@ -107,6 +107,18 @@ fn challenge_five(){
 /// solution for challenge six
 fn challenge_six(){
 	println!("challenge six ::");
+	//hamming test
+	let hamming_test0 = "this is a test";
+	let hamming_test1 = "wokka wokka!!!";
+	let hamming_desired = 37;
+	let hamming_result = hamming_dist(
+		ascii_tobytes( hamming_test0).as_slice(),
+		ascii_tobytes( hamming_test1).as_slice());
+	println!("hamming result: {}", hamming_result);
+	println!("hamming result == desired: {}",
+		hamming_result == hamming_desired);
+	println!("test: {}",
+		bytes_tob64codes( [ 0xff, 0xff, 0xff]));
 	println!("done challenge six");}
 
 /// solution for challenge seven
@@ -141,7 +153,7 @@ fn hexstr_tobytes( input: &str) -> Vec<u8> {
 		byte += hex_toi( input.char_at( i));
 		byte <<= 4;
 		i += 1;
-		//break if byte is \nincomplete
+		//break if byte is incomplete
 		if i == input.len() {
 			bytes.push( byte);
 			break;}
@@ -151,6 +163,19 @@ fn hexstr_tobytes( input: &str) -> Vec<u8> {
 		bytes.push( byte);
 		i += 1;}
 	return bytes;}
+
+fn b64str_tobytes( input: &str) -> Vec<u8> {
+	let mut codes : Vec<u8> = Vec::new();
+	//convert to codes
+	for character in input.chars() {
+		codes.push( b64_toi( character));}
+	//write codes into bytes
+	let mut byte : u8 = 0;
+	let mut bytes : Vec<u8> = Vec::new();
+	let code_count = codes.len();
+	for i in range( 0, code_count) {
+		let code = codes[ i];}
+	return Vec::new();}
 
 fn bytes_tohexstr( bytes : &[u8]) -> String {
 	let mut result = String::new();
@@ -166,11 +191,12 @@ fn bytes_tob64codes( bytes : &[u8]) -> Vec<u8> {
 	let mut codes : Vec<u8> = Vec::new();
 	//write bytes into b64 codes
 	let mut leftover: u8 = 0;
-	for i in range( 0, bytes.len()) {
+	let byte_count = bytes.len();
+	for i in range( 0, byte_count) {
 		let byte = bytes[ i];
 		match i % 3 {
 			0 => {
-				codes.push( ( byte >> 2));
+				codes.push( byte >> 2);
 				leftover = byte & 0b11;}
 			1 => {
 				codes.push( ( (leftover << 4) + (byte >> 4)));
@@ -178,6 +204,12 @@ fn bytes_tob64codes( bytes : &[u8]) -> Vec<u8> {
 			_ => {
 				codes.push( ( (leftover << 2) + (byte >> 6)));
 				codes.push( ( byte & 0b111111));}}}
+	//write in the leftover and padding
+	println!("leftover: {:x}", leftover);
+	match byte_count % 3 {
+		0 => codes.push_all( [ leftover << 4, 64, 64]),
+		1 => codes.push_all( [ leftover << 2, 64]),
+		_ => ()}
 	return codes;}
 
 fn b64codes_tob64str( codes : &[u8]) -> String {
@@ -194,6 +226,17 @@ fn hex_toi( character : char) -> u8 {
 		'a'..'f' => (character as u8) - ('a' as u8) + 10,
 		_ => fail!("error: input contained non-hex chars")}}
 
+/// convert a hex char its corresponding int
+fn b64_toi( character : char) -> u8 {
+	match character {
+		'A'..'Z' => (character as u8) - ('A' as u8) + 0,
+		'a'..'z' => (character as u8) - ('a' as u8) + 26,
+		'0'..'9' => (character as u8) - ('0' as u8) + 53,
+		'+' => 62,
+		'/' => 63,
+		'=' => 64,
+		_ => fail!("error: input contained non-hex chars")}}
+
 /// convert a base64 code into its corresponding char
 fn b64code_tochar( code : u8) -> char {
 	match code {
@@ -202,6 +245,7 @@ fn b64code_tochar( code : u8) -> char {
 		52..61 => ( code - 52 + ('0' as u8)) as char,
 		62 => '+',
 		63 => '/',
+		64 => '=',
 		_ => fail!("error: code out of range")}}
 
 /// convert a hec
@@ -244,7 +288,7 @@ fn xor_cipher( original : &[u8], cipher : u8) -> Vec<u8> {
 		result.push( byte ^ cipher);}
 	return result;}
 
-/// asdf
+/// repeating key xor cipher
 fn rkxor_cipher( original : &[u8], cipher : &[u8]) -> Vec<u8> {
 	let mut result = Vec::new();
 	let ks = cipher.len();
@@ -258,7 +302,6 @@ fn crack_xor_cipher( input : &str) -> TreeMap< u8, (String, f32)> {
 	let input_bytes = hexstr_tobytes( input);
 	//create score table
 	let input_scores = score_bytes( input_bytes.as_slice());
-	//println!("score table: {}", input_scores);
 	//find top scores
 	let mut top_scores : Vec<u8> = Vec::new();
 	let scores_cap = 3;
@@ -267,7 +310,6 @@ fn crack_xor_cipher( input : &str) -> TreeMap< u8, (String, f32)> {
 	top_scores.sort();
 	top_scores.reverse();
 	let top_scores = top_scores.slice_to( scores_cap);
-	//println!("top {} scores: {}", scores_cap, top_scores);
 	//find bytes that match top scores
 	let mut common_bytes : Vec<u8> = Vec::new();
 	for ( &byte, score) in input_scores.iter() {
@@ -276,15 +318,17 @@ fn crack_xor_cipher( input : &str) -> TreeMap< u8, (String, f32)> {
 	//result of above:
 	//  most common bytes in input_bytes: { 120: 6, 55: 5, 54: 3 }
 	let common_bytes = common_bytes.as_slice();
-	//println!("common bytes: {}", common_bytes);
 	//let common_chars = [' ','e','t','a','o','i','n','s','h','r','d','l','u'];
 	let common_chars = [' ', 'e', 't', 'a', 'o', 'i'];
 	let mut extractions : TreeMap< u8, (String, f32)> = TreeMap::new();
 	let rating_cap : f32 = 0.8;
+	//for every common byte and common char
 	for &common_byte in common_bytes.iter() {
 		for &common_char in common_chars.iter() {
+			//interpret the cipher that would map the byte to the char
 			let common_char_byte = common_char.to_ascii().to_byte();
 			let cipher_byte = common_char_byte ^ common_byte;
+			//check if we've already got this cipher
 			if extractions.contains_key( &cipher_byte) {
 				continue;}
 			//create attempt
@@ -294,17 +338,33 @@ fn crack_xor_cipher( input : &str) -> TreeMap< u8, (String, f32)> {
 				continue;}
 			let attempt_ascii = attempt_slice.to_ascii();
 			let attempt = attempt_ascii.as_str_ascii();
+			//trim off any crud
 			for &trimchar in ['\n',' ','\t'].iter() {
 				attempt.trim_chars( trimchar);}
 			//try to filter attempt
 			let rating  = rate_attempt( attempt);
 			if rating > rating_cap {
+				//store the attempt
 				extractions.insert(
 					cipher_byte, ( String::from_str( attempt), rating));}}}
+	//done
 	return extractions;}
+
+/// find the hamming distance of two byte arrays
+fn hamming_dist( a : &[u8], b : &[u8]) -> u32 {
+	if a.len() != b.len() {
+		fail!("mismatching array lengths");}
+	let mut result = 0;
+	for i in range( 0, a.len()){
+		let mut temp = a[i] ^ b[i];
+		while temp != 0 {
+			result += 1;
+			temp &= temp - 1;}}
+	return result;}
 
 /// rate the likelihood a string is a good decoding attempt
 fn rate_attempt( attempt : &str) -> f32 {
+	//params
 	let good_chars = "abcdefghijklmnopqrstuvwxyz ,.?!\'\"";
 	let neut_chars = "()[]{}<>-=_+:;/@#$%^&*~`";
 	let mut positive : f32 = 0.0;
@@ -312,27 +372,32 @@ fn rate_attempt( attempt : &str) -> f32 {
 	let count = attempt.len();
 	//count good and (probably) bad chars
 	for attempt_char in attempt.chars() {
+		//convert to lowercase for convenience
 		let char_lower = attempt_char.to_lowercase();
+		//if char is good, +1
 		if good_chars.contains_char( char_lower) {
 			positive += 1.0;}
+		//if char is bad ( not good nor neutral ), -1
 		else if ! neut_chars.contains_char( char_lower) {
 			negative += 1.0;}}
+	//add it all up in a nice way
 	let numerator = positive.powi( 2) - negative.powi( 2);
 	let denominator = count.to_f32().unwrap().powi( 2);
 	return numerator / denominator;}
 
 /// read every line in file, and write result
 fn read_lines( filename : &str) -> Vec<String> {
-	// Create a path to the desired file
+	// open the file
 	let path = Path::new( filename);
 	let file = File::open( &path);
 	let mut reader = BufferedReader::new( file);
-
+	//read the file
 	let mut result : Vec<String> = Vec::new();
 	for line_result in reader.lines() {
 		if ! line_result.is_ok() {
 			fail!( "reading a line failed");}
 		let line = line_result.unwrap();
+		//strip the newline chars
 		let line_stripped = line.as_slice().trim_chars('\n');
 		result.push( String::from_str( line_stripped));}
 	return result;}
