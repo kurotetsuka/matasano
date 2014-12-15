@@ -2,6 +2,7 @@
 use std::collections::TreeMap;
 use std::io::BufferedReader;
 use std::io::File;
+use std::num::Float;
 
 /// all this set's challenges
 fn main(){
@@ -61,7 +62,7 @@ fn challenge_three(){
 	println!("extractions:");
 	println!("cipher :: message :: rating");
 	for ( &cipher, &( ref message, ref rating)) in extractions.iter() {
-		println!("{:02x} :: {} :: {:.2f}", cipher, message, *rating);}
+		println!("{:02x} :: {} :: {:.2}", cipher, message, *rating);}
 	println!("done challenge three");}
 
 /// solution for challenge four
@@ -74,7 +75,7 @@ fn challenge_four(){
 		if ! extractions.is_empty() {
 			println!("extractions for line {}:", i);
 			for ( &cipher, &( ref message, ref rating)) in extractions.iter() {
-				println!("{:02x} :: {} :: {:.2f}", cipher, message, *rating);}}
+				println!("{:02x} :: {} :: {:.2}", cipher, message, *rating);}}
 		i += 1;}
 	println!("done challenge four");}
 
@@ -118,7 +119,7 @@ fn challenge_six(){
 	println!("hamming result == desired: {}",
 		hamming_result == hamming_desired);
 	println!("test: {}",
-		bytes_tob64codes( [ 0xff, 0xff, 0xff]));
+		bytes_tob64codes( &[ 0xffu8, 0xff, 0xff]));
 	println!("done challenge six");}
 
 /// solution for challenge seven
@@ -170,8 +171,8 @@ fn b64str_tobytes( input: &str) -> Vec<u8> {
 	for character in input.chars() {
 		codes.push( b64_toi( character));}
 	//write codes into bytes
-	let mut byte : u8 = 0;
-	let mut bytes : Vec<u8> = Vec::new();
+	//let mut byte : u8 = 0;
+	//let mut bytes : Vec<u8> = Vec::new();
 	let code_count = codes.len();
 	for i in range( 0, code_count) {
 		let code = codes[ i];}
@@ -182,8 +183,8 @@ fn bytes_tohexstr( bytes : &[u8]) -> String {
 	for &byte in bytes.iter() {
 		let half1 = ( byte >> 4) & 0b1111;
 		let half2 = byte & 0b1111;
-		result.push_char( hexcode_tochar( half1));
-		result.push_char( hexcode_tochar( half2));}
+		result.push( hexcode_tochar( half1));
+		result.push( hexcode_tochar( half2));}
 	return result;}
 
 /// convert a byte string into b64 codes
@@ -207,8 +208,8 @@ fn bytes_tob64codes( bytes : &[u8]) -> Vec<u8> {
 	//write in the leftover and padding
 	println!("leftover: {:x}", leftover);
 	match byte_count % 3 {
-		0 => codes.push_all( [ leftover << 4, 64, 64]),
-		1 => codes.push_all( [ leftover << 2, 64]),
+		0 => codes.push_all( &[ leftover << 4, 64, 64]),
+		1 => codes.push_all( &[ leftover << 2, 64]),
 		_ => ()}
 	return codes;}
 
@@ -216,49 +217,49 @@ fn b64codes_tob64str( codes : &[u8]) -> String {
 	let mut result = String::new();
 	//convert b64 codes into string
 	for i in range( 0, codes.len()) {
-		result.push_char( b64code_tochar( codes[ i]));}
+		result.push( b64code_tochar( codes[ i]));}
 	return result;}
 
 /// convert a hex char its corresponding int
 fn hex_toi( character : char) -> u8 {
 	match character {
-		'0'..'9' => (character as u8) - ('0' as u8) + 0,
-		'a'..'f' => (character as u8) - ('a' as u8) + 10,
-		_ => fail!("error: input contained non-hex chars")}}
+		'0'...'9' => (character as u8) - ('0' as u8) + 0,
+		'a'...'f' => (character as u8) - ('a' as u8) + 10,
+		_ => panic!("error: input contained non-hex chars")}}
 
 /// convert a hex char its corresponding int
 fn b64_toi( character : char) -> u8 {
 	match character {
-		'A'..'Z' => (character as u8) - ('A' as u8) + 0,
-		'a'..'z' => (character as u8) - ('a' as u8) + 26,
-		'0'..'9' => (character as u8) - ('0' as u8) + 53,
+		'A'...'Z' => (character as u8) - ('A' as u8) + 0,
+		'a'...'z' => (character as u8) - ('a' as u8) + 26,
+		'0'...'9' => (character as u8) - ('0' as u8) + 53,
 		'+' => 62,
 		'/' => 63,
 		'=' => 64,
-		_ => fail!("error: input contained non-hex chars")}}
+		_ => panic!("error: input contained non-hex chars")}}
 
 /// convert a base64 code into its corresponding char
 fn b64code_tochar( code : u8) -> char {
 	match code {
-		00..25 => ( code - 00 + ('A' as u8)) as char,
-		26..51 => ( code - 26 + ('a' as u8)) as char,
-		52..61 => ( code - 52 + ('0' as u8)) as char,
+		00...25 => ( code - 00 + ('A' as u8)) as char,
+		26...51 => ( code - 26 + ('a' as u8)) as char,
+		52...61 => ( code - 52 + ('0' as u8)) as char,
 		62 => '+',
 		63 => '/',
 		64 => '=',
-		_ => fail!("error: code out of range")}}
+		_ => panic!("error: code out of range")}}
 
 /// convert a hec
 fn hexcode_tochar( code : u8) -> char {
 	match code {
-		00..09 => ( code - 00 + ('0' as u8)) as char,
-		10..15 => ( code - 10 + ('a' as u8)) as char,
-		_ => fail!("error: code out of range")}}
+		00...09 => ( code - 00 + ('0' as u8)) as char,
+		10...15 => ( code - 10 + ('a' as u8)) as char,
+		_ => panic!("error: code out of range")}}
 
 fn ascii_tobytes( string : &str) -> Vec<u8> {
 	let mut result = Vec::new();
 	for character in string.chars() {
-		result.push( character.to_ascii().to_byte());}
+		result.push( character.to_ascii().as_byte());}
 	return result;}
 
 //utilities
@@ -275,8 +276,8 @@ fn score_bytes( bytes : &[u8]) -> TreeMap<u8, u8> {
 	let mut table : TreeMap<u8, u8> = TreeMap::new();
 	for &byte in bytes.iter() {
 		let new_count =
-			match table.find( &byte) {
-				Some( count) => count + 1,
+			match table.get( &byte) {
+				Some( &count) => count + 1,
 				None => 1};
 		table.insert( byte, new_count);}
 	return table;}
@@ -326,7 +327,7 @@ fn crack_xor_cipher( input : &str) -> TreeMap< u8, (String, f32)> {
 	for &common_byte in common_bytes.iter() {
 		for &common_char in common_chars.iter() {
 			//interpret the cipher that would map the byte to the char
-			let common_char_byte = common_char.to_ascii().to_byte();
+			let common_char_byte = common_char.to_ascii().as_byte();
 			let cipher_byte = common_char_byte ^ common_byte;
 			//check if we've already got this cipher
 			if extractions.contains_key( &cipher_byte) {
@@ -353,7 +354,7 @@ fn crack_xor_cipher( input : &str) -> TreeMap< u8, (String, f32)> {
 /// find the hamming distance of two byte arrays
 fn hamming_dist( a : &[u8], b : &[u8]) -> u32 {
 	if a.len() != b.len() {
-		fail!("mismatching array lengths");}
+		panic!("mismatching array lengths");}
 	let mut result = 0;
 	for i in range( 0, a.len()){
 		let mut temp = a[i] ^ b[i];
@@ -395,7 +396,7 @@ fn read_lines( filename : &str) -> Vec<String> {
 	let mut result : Vec<String> = Vec::new();
 	for line_result in reader.lines() {
 		if ! line_result.is_ok() {
-			fail!( "reading a line failed");}
+			panic!( "reading a line failed");}
 		let line = line_result.unwrap();
 		//strip the newline chars
 		let line_stripped = line.as_slice().trim_chars('\n');

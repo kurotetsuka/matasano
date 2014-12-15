@@ -5,7 +5,8 @@ clean:
 	rm -rf bin/*
 
 #vars
-options = -A dead_code -A unused_variable
+#options = -A dead_code
+options = -A dead_code -A unused_variables
 
 #includes
 include lists.mk
