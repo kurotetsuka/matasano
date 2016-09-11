@@ -1,28 +1,53 @@
-#globals
+# globals
 default: build
 freshen: clean build
 clean:
 	rm -rf bin/*
 
-#vars
+# vars
+options =
 #options = -A dead_code
-options = -A dead_code -A unused_variables
+#options = -A dead_code -A unused_variables
 
-#includes
+# includes
 include lists.mk
+include deps.mk
 
-#compilation definitions
-$(binaries): bin/% : src/%.rs
-	rustc $(options) -g $< -o $@
+# compilation definitions
+$(dirs):
+	mkdir -p $@
 
-#commands
-build: $(binaries)
+$(libraries): bin/lib%.rlib: src/%/lib.rs
+	rustc --out-dir bin/ $<
 
-#tests
-test: test-set-one
+$(binaries): bin/% : src/bin/%.rs
+	rustc $(options) \
+		-L crate=bin/ \
+		-g $< -o $@
+
+# commands
+dirs: $(dirs)
+build: dirs $(binaries)
+
+# tests
+test: dirs test-set-one
 
 test-asdf: bin/asdf
-	bin/asdf
+	$<
 
-test-set-one: bin/set_one
-	bin/set_one
+test-s1c1: bin/set1/c1
+	$<
+test-s1c2: bin/set1/c2
+	$<
+test-s1c3: bin/set1/c3
+	$<
+test-s1c4: bin/set1/c4
+	$<
+test-s1c5: bin/set1/c5
+	$<
+test-s1c6: bin/set1/c6
+	$<
+test-s1c7: bin/set1/c7
+	$<
+test-s1c8: bin/set1/c8
+	$<
