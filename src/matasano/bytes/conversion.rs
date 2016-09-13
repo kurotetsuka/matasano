@@ -1,3 +1,37 @@
+// local imports
+use super::*;
+
+pub trait FromHexStr {
+	fn from_hexstr( string: &str) -> Option<Bytes>;
+}
+pub trait FromB64Str {
+	fn from_b64str( string: &str) -> Option<Bytes>;
+}
+pub trait ToHexStr {
+	fn to_hexstr( &self) -> String;
+}
+pub trait ToB64Str {
+	fn to_b64str( &self) -> String;
+}
+
+
+impl FromHexStr for Bytes {
+	fn from_hexstr( string: &str) -> Option<Bytes> {
+		return hexstr_to_bytes( string);}
+}
+impl FromB64Str for Bytes {
+	fn from_b64str( string: &str) -> Option<Bytes> {
+		return b64str_to_bytes( string);}
+}
+impl ToHexStr for Bytes {
+	fn to_hexstr( &self) -> String {
+		return bytes_to_hexstr( self);}
+}
+impl ToB64Str for Bytes {
+	fn to_b64str( &self) -> String {
+		return bytes_to_b64str( self);}
+}
+
 
 pub fn hexstr_to_bytes( string: &str) -> Option<Vec<u8>> {
 	// odd size check

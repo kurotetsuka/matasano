@@ -12,20 +12,15 @@ pub trait ByteOps {
 
 impl ByteOps for Bytes {
 	fn xor_bytes( &self, other: &Bytes) -> Self {
-		xor( self.iter(), other.iter())}
+		xor( self, other)}
 	fn xor_byte( &self, key: &u8) -> Self{
-		xor( self.iter(), repeat( key))}
+		xor( self, repeat( key))}
 	fn xor_cipher( &self, key: &Bytes) -> Self{
-		xor( self.iter(), key.iter().cycle())}
+		xor( self, key.iter().cycle())}
 }
 
 pub fn xor<'a, A, B>( a : A , b : B ) -> Bytes
-		where A : Iterator<Item=&'a u8>, B : Iterator<Item=&'a u8> {
-	a.zip( b)
-		.map( |(a, b)|{ a ^ b})
+		where A : IntoIterator<Item=&'a u8>, B : IntoIterator<Item=&'a u8> {
+	a.into_iter().zip( b.into_iter())
+		.map( | (a, b) | a ^ b)
 		.collect()}
-fn find_min<'a, I>(vals: I) -> Option<&'a u8>
-    where I: Iterator<Item=&'a u8>
-{
-    vals.min()
-}
