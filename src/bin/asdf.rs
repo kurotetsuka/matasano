@@ -14,9 +14,16 @@ use std::collections::BTreeMap;
 use matasano::bytes::*;
 
 fn main(){
-	let common = [' ', 'e', 't', 'a', 'o', 'i'];
-	let bytes = common.iter().map( | &c | c as u8);
-	println!( "{:?}", common);
-	for byte in bytes {
-		println!( "{:02}", byte ^ 101u8);}
+	let bytes : Bytes = (0..80).collect();
+	let blocks = blockify( &bytes, 5);
+	for block in blocks {
+		println!( "block: {:?}", block);}
 }
+
+fn blockify( bytes: &[u8], size: usize) -> Vec<Bytes> {
+	let mut blocks = vec![ Bytes::new(); size];
+	for (&byte, i) in bytes.iter().zip( (0..size).cycle()) {
+		blocks[i].push( byte);}
+	println!( "blocks size: {}", blocks.len());
+	println!( "blocks[0] size: {}", blocks[0].len());
+	return blocks;}

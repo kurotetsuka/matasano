@@ -16,8 +16,14 @@ fn main(){
 
 	let file = File::open( "data/set1/6.txt").unwrap();
 	let cipher_text = read_b64_lines( file).unwrap();
-	let (key, plain_text) = crack_rkxor( &cipher_text);
+
+	// find key
+	let key = crack_rkxor( &cipher_text);
 	println!( "key: {}", key.to_hexstr());
+	println!( "key: {:?}", key.to_ascii().unwrap());
+
+	// decrypt plain text
+	let plain_text = cipher_text.xor_cipher( &key);
 	let plain_text = plain_text.to_ascii().unwrap();
 	println!( "plain_text: {}", plain_text);
 }
