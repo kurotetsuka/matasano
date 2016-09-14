@@ -1,11 +1,23 @@
+// imports
+use std::ascii::AsciiExt;
+
 // local imports
 use super::*;
 
+pub trait FromAsciiStr {
+	fn from_ascii( string: &str) -> Option<Self>
+		where Self: Sized;
+}
 pub trait FromHexStr {
-	fn from_hexstr( string: &str) -> Option<Bytes>;
+	fn from_hexstr( string: &str) -> Option<Self>
+		where Self: Sized;
 }
 pub trait FromB64Str {
-	fn from_b64str( string: &str) -> Option<Bytes>;
+	fn from_b64str( string: &str) -> Option<Self>
+		where Self: Sized;
+}
+pub trait ToAsciiStr {
+	fn to_ascii( &self) -> Option<String>;
 }
 pub trait ToHexStr {
 	fn to_hexstr( &self) -> String;
@@ -14,7 +26,13 @@ pub trait ToB64Str {
 	fn to_b64str( &self) -> String;
 }
 
-
+impl FromAsciiStr for Bytes {
+	fn from_ascii( string: &str) -> Option<Bytes> {
+		if ! string.is_ascii() {
+			None}
+		else {
+			Some( string.as_bytes().to_vec())}}
+}
 impl FromHexStr for Bytes {
 	fn from_hexstr( string: &str) -> Option<Bytes> {
 		return hexstr_to_bytes( string);}
@@ -22,6 +40,11 @@ impl FromHexStr for Bytes {
 impl FromB64Str for Bytes {
 	fn from_b64str( string: &str) -> Option<Bytes> {
 		return b64str_to_bytes( string);}
+}
+impl ToAsciiStr for Bytes {
+	fn to_ascii( &self) -> Option<String> {
+		if ! self.is_ascii() { None}
+		else { String::from_utf8( self.clone()).ok()}}
 }
 impl ToHexStr for Bytes {
 	fn to_hexstr( &self) -> String {

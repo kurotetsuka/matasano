@@ -1,4 +1,3 @@
-
 // imports
 use std::iter::Iterator;
 use std::iter::repeat;
